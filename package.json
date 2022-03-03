@@ -1,0 +1,23 @@
+{
+  "name": "starpetnodejs",
+  "version": "1.0.0",
+  "description": "Allows starpet techs to insert data from machine readings",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/starpetCapstone/starpetNodeJS.git"
+  },
+  "author": "Brinkley Hill, Lexi Hofflinger",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/starpetCapstone/starpetNodeJS/issues"
+  },
+  "homepage": "https://github.com/starpetCapstone/starpetNodeJS#readme",
+  "dependencies": {
+    "express": "^4.17.3",
+    "mysql": "^2.18.1"
+  }
+}

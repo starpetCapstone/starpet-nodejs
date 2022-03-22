@@ -109,7 +109,7 @@
       </div>
       <a
         id="link"
-        href="user.html"
+        href="../views/userPage/user.ejs"
         class="w-100 btn btn-lg btn-primary"
         role="button"
         onclick="changeLoginLink()"
@@ -118,12 +118,12 @@
     </main>
     <script>
       function changeLoginLink() {
-        var admin = "../admin/admin.html";
-        var normal = "user.html";
+        var admin = "../views/adminPage/admin.ejs";
+        var normal = "../views/userPage/user.ejs";
         var username = document.getElementById("userNAME").value;
         let link = document.getElementById("link");
         if (username == "admin") {
-          link.setAttribute("href", "../admin/admin.html");
+          link.setAttribute("href", "../views/adminPage/admin.ejs");
         }
       }
     </script>

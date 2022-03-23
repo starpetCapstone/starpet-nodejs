@@ -1,17 +1,17 @@
 const express = require("express");
 const mysql = require("mysql2");
-
+const bodyParser = require("body-parser");
+const { UCS2_PERSIAN_CI } = require("mysql/lib/protocol/constants/charsets");
 const app = express();
 // create connection
 const db = mysql.createConnection({
-  host: "localhost",
+  host: process.env.DATABASE_host,
   port: "8889",
   user: "brinkley",
   password: "hello",
   database: "test1",
 });
-
-// connec to database
+// connect to database
 db.connect((err) => {
   if (err) {
     console.log(err);
@@ -19,46 +19,53 @@ db.connect((err) => {
   console.log("MySql Connected");
 });
 
-//create DB
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(express.static(__dirname + "/public"));
+//set view engine to ejs
+app.set("view engine", "ejs");
+
+//***********GET FUNCTIONS***************
+//first time DB setup
 app.get("/create", (req, res) => {
   let table1 =
-    "CREATE TABLE SPW_Plants (PlantID integer, PlantName varchar(50), PlantCreated TIMESTAMP, PRIMARY KEY (PlantID))";
+    "CREATE TABLE SPW_Plants (PlantID integer NOT NULL AUTO_INCREMENT, PlantName varchar(50), PlantCreated TIMESTAMP, PRIMARY KEY (PlantID))";
   db.query(table1, (err, result) => {
     if (err) throw err;
     console.log("table1 is created...");
   });
   let table2 =
-    "CREATE TABLE SPW_Floors (FloorID integer, PlantID integer, FloorName varchar(50), FloorCreated TIMESTAMP, PRIMARY KEY (FloorID, PlantID),  FOREIGN KEY (PlantID) REFERENCES SPW_Plants(PlantID))";
+    "CREATE TABLE SPW_Floors (FloorID integer NOT NULL AUTO_INCREMENT, PlantID integer, FloorName varchar(50), FloorCreated TIMESTAMP, PRIMARY KEY (FloorID, PlantID),  FOREIGN KEY (PlantID) REFERENCES SPW_Plants(PlantID))";
   db.query(table2, (err, result) => {
     if (err) throw err;
     console.log("table2 is created...");
   });
   let table3 =
-    "CREATE TABLE SPW_Machines (MachineID integer, FloorID integer, PlantID integer, MachineName varchar(50), MachineCreated TIMESTAMP, PRIMARY KEY (MachineID), FOREIGN KEY (PlantID, FloorID) REFERENCES SPW_Floors(PlantID, FloorID))";
+    "CREATE TABLE SPW_Machines (MachineID integer NOT NULL AUTO_INCREMENT, FloorID integer, PlantID integer, MachineName varchar(50), MachineCreated TIMESTAMP, PRIMARY KEY (MachineID), FOREIGN KEY (PlantID, FloorID) REFERENCES SPW_Floors(PlantID, FloorID))";
   db.query(table3, (err, result) => {
     if (err) throw err;
     console.log("table3 is created...");
   });
   let table4 =
-    "CREATE TABLE SPW_Data (DataID integer, MachineID integer, DataName varchar(50), DataCreated TIMESTAMP, PRIMARY KEY (DataID, MachineID),  FOREIGN KEY (MachineID) REFERENCES SPW_Machines(MachineID))";
+    "CREATE TABLE SPW_Data (DataID integer NOT NULL AUTO_INCREMENT, MachineID integer, DataName varchar(50), DataCreated TIMESTAMP, PRIMARY KEY (DataID, MachineID),  FOREIGN KEY (MachineID) REFERENCES SPW_Machines(MachineID))";
   db.query(table4, (err, result) => {
     if (err) throw err;
     console.log("table4 is created...");
   });
   let table5 =
-    "CREATE TABLE SPW_Shifts (ShiftID integer, ShiftName varchar(50), TimeOfDay varchar(50), ShiftCreated TIMESTAMP, PRIMARY KEY (ShiftID))";
+    "CREATE TABLE SPW_Shifts (ShiftID integer NOT NULL AUTO_INCREMENT, ShiftName varchar(50), TimeOfDay varchar(50), ShiftCreated TIMESTAMP, PRIMARY KEY (ShiftID))";
   db.query(table5, (err, result) => {
     if (err) throw err;
     console.log("table5 is created...");
   });
   let table6 =
-    "CREATE TABLE SPW_Users (UserID integer, Username varchar(50), Password varchar(50), PermissionLevel integer, UserCreated TIMESTAMP, PRIMARY KEY (UserID))";
+    "CREATE TABLE SPW_Users (UserID integer NOT NULL AUTO_INCREMENT, Username varchar(50), Password varchar(50), PermissionLevel integer, UserCreated TIMESTAMP, PRIMARY KEY (UserID))";
   db.query(table6, (err, result) => {
     if (err) throw err;
     console.log("table6 is created...");
   });
   let table7 =
-    "CREATE TABLE SPW_UserShifts (UserShiftID integer, UserID integer, ShiftID integer, PRIMARY KEY (UserShiftID, UserID, ShiftID), FOREIGN KEY (ShiftID) REFERENCES SPW_Shifts(ShiftID),  FOREIGN KEY (UserID) REFERENCES SPW_Users(UserID))";
+    "CREATE TABLE SPW_UserShifts (UserShiftID integer NOT NULL AUTO_INCREMENT, UserID integer, ShiftID integer, PRIMARY KEY (UserShiftID, UserID, ShiftID), FOREIGN KEY (ShiftID) REFERENCES SPW_Shifts(ShiftID),  FOREIGN KEY (UserID) REFERENCES SPW_Users(UserID))";
   db.query(table7, (err, result) => {
     if (err) throw err;
     console.log("table7 is created...");
@@ -71,11 +78,57 @@ app.get("/create", (req, res) => {
     res.send("ALL TABLES COMPLETE...");
   });
 });
-// set the view engine to ejs
-app.set("view engine", "ejs");
 
 app.get("/", function (req, res) {
   res.render("login");
+});
+
+app.get("/userspage", function (req, res) {
+  res.render("adminPage/users", {
+    firstName: "Brinkley",
+    navlinkdashboard: "",
+    navlinkdata: "",
+    navlinkshifts: "",
+    navlinkusers: "active",
+    navlinkreports: "",
+    navlinklocations: "",
+  });
+});
+
+//stuff for practice
+app.get("/jared", (req, res) => {
+  let sql =
+    "INSERT INTO SPW_Users(Username, Password, PermissionLevel) VALUES ('jared', 'hello', '4');";
+  db.query(sql, (err, result) => {
+    if (err) throw err;
+    console.log("name is created...");
+    res.send("name is COMPLETE...");
+  });
+});
+
+app.get("/branson", (req, res) => {
+  let sql =
+    "SELECT UserID, Username, Password, PermissionLevel FROM SPW_Users; ";
+  db.query(sql, (err, result) => {
+    if (err) throw err;
+    console.log("displau is created...");
+    res.send(result);
+  });
+});
+
+//***********POST FUNCTIONS***************
+app.post("/newuser", function (req, res, next) {
+  var username = req.body.username;
+  var password = req.body.password;
+  var permlevel = req.body.permlevel;
+  console.log(username, password, permlevel);
+
+  var sql = `INSERT INTO SPW_Users(Username, Password, PermissionLevel) VALUES ("${username}", "${password}", "${permlevel}")`;
+  db.query(sql, function (err, result) {
+    if (err) throw err;
+    console.log("record inserted");
+    res.redirect("/users");
+  });
 });
 
 //have app listen on specifc port

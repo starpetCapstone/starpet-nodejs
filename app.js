@@ -2,6 +2,8 @@ const express = require("express");
 const mysql = require("mysql2");
 const bodyParser = require("body-parser");
 const { UCS2_PERSIAN_CI } = require("mysql/lib/protocol/constants/charsets");
+const session = require("express-session");
+const path = require("path");
 const app = express();
 // create connection
 const db = mysql.createConnection({
@@ -21,6 +23,13 @@ db.connect((err) => {
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(
+  session({
+    secret: "secret",
+    resave: true,
+    saveUninitialized: true,
+  })
+);
 app.use(express.static(__dirname + "/public"));
 //set view engine to ejs
 app.set("view engine", "ejs");
@@ -80,11 +89,14 @@ app.get("/create", (req, res) => {
 });
 
 app.get("/", function (req, res) {
-  res.render("login");
+  res.render("login", {
+    errorMessage: "",
+  });
 });
 
 app.get("/userspage", function (req, res) {
   res.render("adminPage/users", {
+    pagename: "Users",
     firstName: "Brinkley",
     navlinkdashboard: "",
     navlinkdata: "",
@@ -92,6 +104,66 @@ app.get("/userspage", function (req, res) {
     navlinkusers: "active",
     navlinkreports: "",
     navlinklocations: "",
+  });
+});
+
+app.get("/dashboardpage", function (req, res) {
+  res.render("adminPage/dashboard", {
+    pagename: "Dashboard",
+    navlinkdashboard: "active",
+    navlinkdata: "",
+    navlinkshifts: "",
+    navlinkusers: "",
+    navlinkreports: "",
+    navlinklocations: "",
+  });
+});
+
+app.get("/datapage", function (req, res) {
+  res.render("adminPage/data", {
+    pagename: "Data",
+    navlinkdashboard: "",
+    navlinkdata: "active",
+    navlinkshifts: "",
+    navlinkusers: "",
+    navlinkreports: "",
+    navlinklocations: "",
+  });
+});
+
+app.get("/shiftspage", function (req, res) {
+  res.render("adminPage/shifts", {
+    pagename: "Shifts",
+    navlinkdashboard: "",
+    navlinkdata: "",
+    navlinkshifts: "active",
+    navlinkusers: "",
+    navlinkreports: "",
+    navlinklocations: "",
+  });
+});
+
+app.get("/reportspage", function (req, res) {
+  res.render("adminPage/reports", {
+    pagename: "Reports",
+    navlinkdashboard: "",
+    navlinkdata: "",
+    navlinkshifts: "",
+    navlinkusers: "",
+    navlinkreports: "active",
+    navlinklocations: "",
+  });
+});
+
+app.get("/locationspage", function (req, res) {
+  res.render("adminPage/locations", {
+    pagename: "Locations",
+    navlinkdashboard: "",
+    navlinkdata: "",
+    navlinkshifts: "",
+    navlinkusers: "",
+    navlinkreports: "",
+    navlinklocations: "active",
   });
 });
 
@@ -111,7 +183,7 @@ app.get("/branson", (req, res) => {
     "SELECT UserID, Username, Password, PermissionLevel FROM SPW_Users; ";
   db.query(sql, (err, result) => {
     if (err) throw err;
-    console.log("displau is created...");
+    console.log("display is created...");
     res.send(result);
   });
 });
@@ -127,8 +199,44 @@ app.post("/newuser", function (req, res, next) {
   db.query(sql, function (err, result) {
     if (err) throw err;
     console.log("record inserted");
-    res.redirect("/users");
+    res.redirect("/userspage");
   });
+});
+
+app.post("/auth", function (request, response) {
+  // Capture the input fields
+  let username = request.body.username;
+  let password = request.body.password;
+  // Ensure the input fields exists and are not empty
+  if (username && password) {
+    // Execute SQL query that'll select the account from the database based on the specified username and password
+    db.query(
+      "SELECT * FROM SPW_Users WHERE username = ? AND password = ?",
+      [username, password],
+      function (error, results, fields) {
+        // If there is an issue with the query, output the error
+        if (error) throw error;
+        // If the account exists
+        if (results.length > 0) {
+          // Authenticate the user
+
+          request.session.username = username;
+          // Redirect to home page
+          response.redirect("/usersPage");
+        } else {
+          response.render("login", {
+            errorMessage: "Incorrect Username or Password",
+          });
+        }
+        response.end();
+      }
+    );
+  } else {
+    response.render("login", {
+      errorMessage: "Please Username or Password",
+    });
+    response.end();
+  }
 });
 
 //have app listen on specifc port

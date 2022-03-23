@@ -84,48 +84,29 @@
         height="57"
       />
       <h1 class="h3 mb-3 fw-normal">Starpet Inc.</h1>
-
-      <div class="form-floating">
+      <form action="/auth" method="post">
         <input
-          id="userNAME"
+          id="username"
           type="username"
           name="username"
           class="form-control"
-          id="floatingInput"
-          placeholder="username"
+          placeholder="Username"
         />
-        <label for="floatingInput">Username</label>
-      </div>
-      <p></p>
-      <div class="form-floating">
+
+        <p></p>
+
         <input
           type="password"
-          name="pword"
+          name="password"
           class="form-control"
-          id="floatingPassword"
-          placeholder="****"
+          placeholder="Password"
         />
-        <label for="floatingPassword">Pin</label>
-      </div>
-      <a
-        id="link"
-        href="../userspage"
-        class="w-100 btn btn-lg btn-primary"
-        role="button"
-        onclick="changeLoginLink()"
-        >Sign In</a
-      >
+
+        <button type="submit" class="w-100 btn btn-lg btn-primary">
+          Sign-In
+        </button>
+      </form>
+      <p><%= errorMessage %></p>
     </main>
-    <script>
-      function changeLoginLink() {
-        var admin = "../admin/admin.html";
-        var normal = "user.html";
-        var username = document.getElementById("userNAME").value;
-        let link = document.getElementById("link");
-        if (username == "admin") {
-          link.setAttribute("href", "../admin/admin.html");
-        }
-      }
-    </script>
   </body>
 </html>

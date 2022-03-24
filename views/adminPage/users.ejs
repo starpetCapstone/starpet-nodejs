@@ -24,46 +24,59 @@
   </div>
 
   <form action="newuser" method="POST" class="form-inline">
-    <div class="form-row align-items-center">
-      <label for="username">Username</label>
+    <p><b>Create New User</b></p>
+    <div class="input-group">
       <input
         type="text"
-        class="form-control col-lg-9"
+        class="form-control"
         id="username"
-        aria-describedby="emailHelp"
         placeholder="Enter username"
         name="username"
       />
-    </div>
-    <div class="form-group">
-      <label for="password">Password</label>
+
       <input
         type="text"
-        class="form-control col-lg-9"
+        class="form-control"
         id="password"
-        aria-describedby="emailHelp"
         placeholder="Enter password"
         name="password"
       />
-    </div>
-    <div class="form-group">
-      <label for="permlevel">Permission Level</label>
-      <select
-        id="permlevel"
-        class="form-control col-lg-9"
-        aria-describedby="emailHelp"
-        name="permlevel"
-        placeholder="Select Permission Label"
-      >
-        <option selected>1</option>
+
+      <select id="permlevel" class="form-control" name="permlevel">
+        <option hidden>Select Permission Level</option>
+        <option>1</option>
         <option>2</option>
         <option>3</option>
         <option>4</option>
       </select>
-    </div>
 
-    <button type="submit" class="btn btn-primary">Submit</button>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
   </form>
+  <p></p>
+  <div style="overflow:scroll">
+
+    <table class="table table-hover">
+  
+      <thead>
+        <tr>
+          <th scope="col">Username</th>
+          <th scope="col">Password</th>
+          <th scope="col">PermLevel</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for(var i=0; i<users.length; i++) {%>
+        <tr>
+          <td contenteditable="true", onkeypress=""><%= users[i].Username %></td>
+          <td><%= users[i].Password %></td>
+          <td><%= users[i].PermissionLevel %></td>
+        </tr>
+        <% } %>
+      </tbody>
+
+    </table>
+  </div>
 </main>
 
 <%- include('partials/footer.ejs') %>

@@ -95,15 +95,23 @@ app.get("/", function (req, res) {
 });
 
 app.get("/userspage", function (req, res) {
-  res.render("adminPage/users", {
-    pagename: "Users",
-    firstName: "Brinkley",
-    navlinkdashboard: "",
-    navlinkdata: "",
-    navlinkshifts: "",
-    navlinkusers: "active",
-    navlinkreports: "",
-    navlinklocations: "",
+  var query = "select * from SPW_Users";
+
+  db.query(query, function (err, result) {
+    if (err) throw err;
+    else {
+      res.render("adminPage/users", {
+        pagename: "Users",
+        firstName: "Brinkley",
+        navlinkdashboard: "",
+        navlinkdata: "",
+        navlinkshifts: "",
+        navlinkusers: "active",
+        navlinkreports: "",
+        navlinklocations: "",
+        users: result,
+      });
+    }
   });
 });
 

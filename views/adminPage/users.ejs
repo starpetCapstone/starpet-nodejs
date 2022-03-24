@@ -68,9 +68,9 @@
       <tbody>
         <% for(var i=0; i<users.length; i++) {%>
         <tr>
-          <td contenteditable="true", onkeypress=""><%= users[i].Username %></td>
-          <td><%= users[i].Password %></td>
-          <td><%= users[i].PermissionLevel %></td>
+          <td id = "username" contenteditable="true" onkeypress=""><%= users[i].Username %></td>
+          <td id = "password" contenteditable="true" onkeypress=""><%= users[i].Password %></td>
+          <td id = "permlevel" contenteditable="true" onkeypress=""><%= users[i].PermissionLevel %></td>
         </tr>
         <% } %>
       </tbody>

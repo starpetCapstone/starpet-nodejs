@@ -247,23 +247,6 @@ app.post("/auth", function (request, response) {
   }
 });
 
-app.post("/edituser", function (req, res, next) {
-  var username = req.body.username;
-  var password = req.body.password;
-  var permlevel = req.body.permlevel;
-  var userid = req.body.userID;
-  console.log(username, password, permlevel);
-
-  var sql = `INSERT INTO SPW_Users(Username, Password, PermissionLevel) VALUES ("${username}", "${password}", "${permlevel}")`;
-  var sql =
-    "UPDATE SPW_Users SET Username = value1, Password = value2, PermissionLevel = value3 WHERE UserID = value;";
-  db.query(sql, function (err, result) {
-    if (err) throw err;
-    console.log("record inserted");
-    res.redirect("/userspage");
-  });
-});
-
 //have app listen on specifc port
 app.listen("3000", () => {
   console.log("Server is running on Port 3000");

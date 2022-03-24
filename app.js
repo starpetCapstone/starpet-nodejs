@@ -251,6 +251,7 @@ app.post("/edituser", function (req, res, next) {
   var username = req.body.username;
   var password = req.body.password;
   var permlevel = req.body.permlevel;
+  var userid = req.body.userID;
   console.log(username, password, permlevel);
 
   var sql = `INSERT INTO SPW_Users(Username, Password, PermissionLevel) VALUES ("${username}", "${password}", "${permlevel}")`;

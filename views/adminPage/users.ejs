@@ -54,10 +54,8 @@
     </div>
   </form>
   <p></p>
-  <div style="overflow:scroll">
-
-    <table class="table table-hover">
-  
+  <div class="table-responsive">
+    <table class="table table-hover" style="overflow:auto" height="100px">
       <thead>
         <tr>
           <th scope="col">Username</th>
@@ -68,13 +66,12 @@
       <tbody>
         <% for(var i=0; i<users.length; i++) {%>
         <tr>
-          <td id = "username" contenteditable="true" onkeypress=""><%= users[i].Username %></td>
-          <td id = "password" contenteditable="true" onkeypress=""><%= users[i].Password %></td>
-          <td id = "permlevel" contenteditable="true" onkeypress=""><%= users[i].PermissionLevel %></td>
+          <td id="username" contenteditable="true"> <%= users[i].Username %></td>
+          <td id = "password" contenteditable="true" ><%= users[i].Password %></td>
+          <td id = "permlevel" contenteditable="true"><%= users[i].PermissionLevel %></td>
         </tr>
         <% } %>
       </tbody>
-
     </table>
   </div>
 </main>

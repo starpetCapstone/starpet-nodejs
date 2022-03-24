@@ -218,11 +218,11 @@ app.post("/auth", function (request, response) {
         if (error) throw error;
         // If the account exists
         if (results.length > 0) {
-          // Authenticate the user
-
-          request.session.username = username;
-          // Redirect to home page
-          response.redirect("/usersPage");
+          if (results[0].PermissionLevel >= 3) {
+            response.redirect("/dashboardpage");
+          } else if (results[0].PermissionLevel < 3) {
+            response.redirect("/userspage");
+          }
         } else {
           response.render("login", {
             errorMessage: "Incorrect Username or Password",
@@ -233,7 +233,7 @@ app.post("/auth", function (request, response) {
     );
   } else {
     response.render("login", {
-      errorMessage: "Please Username or Password",
+      errorMessage: "Please Enter Username and Password",
     });
     response.end();
   }

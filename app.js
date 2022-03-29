@@ -10,9 +10,9 @@ const favicon = require("serve-favicon");
 // create connection
 const db = mysql.createConnection({
   host: process.env.DATABASE_host,
-  port: "8889",
-  user: "brinkley",
-  password: "hello",
+  port: "3306",
+  user: "root",
+  password: "root",
   database: "test1",
 });
 // connect to database

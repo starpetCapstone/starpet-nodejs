@@ -95,7 +95,6 @@ app.get("/", function (req, res) {
   res.render("login", {
     errorMessage: "",
   });
-  res.sendFile("index.html", { root: __dirname });
 });
 
 app.get("/userspage", function (req, res) {
@@ -203,10 +202,7 @@ app.post("/newuser", function (req, res, next) {
 
   var sql = `INSERT INTO SPW_Users(Username, Password, PermissionLevel) VALUES ("${username}", "${password}", "${permlevel}")`;
   db.query(sql, function (err, result) {
-    if (err)
-      res.render("404", {
-        errorMessage: err,
-      });
+    if (err) throw err;
     console.log("record inserted");
     res.redirect("/userspage");
   });

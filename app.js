@@ -5,6 +5,8 @@ const { UCS2_PERSIAN_CI } = require("mysql/lib/protocol/constants/charsets");
 const session = require("express-session");
 const path = require("path");
 const app = express();
+const favicon = require("serve-favicon");
+
 // create connection
 const db = mysql.createConnection({
   host: process.env.DATABASE_host,
@@ -31,6 +33,7 @@ app.use(
   })
 );
 app.use(express.static(__dirname + "/public"));
+
 //set view engine to ejs
 app.set("view engine", "ejs");
 
@@ -116,18 +119,6 @@ app.get("/userspage", function (req, res) {
   });
 });
 
-app.get("/dashboardpage", function (req, res) {
-  res.render("adminPage/dashboard", {
-    pagename: "Dashboard",
-    navlinkdashboard: "active",
-    navlinkdata: "",
-    navlinkshifts: "",
-    navlinkusers: "",
-    navlinkreports: "",
-    navlinklocations: "",
-  });
-});
-
 app.get("/datapage", function (req, res) {
   res.render("adminPage/data", {
     pagename: "Data",
@@ -176,6 +167,12 @@ app.get("/locationspage", function (req, res) {
   });
 });
 
+app.get("/404", function (req, res) {
+  res.render("404", {
+    errorMessage: "",
+  });
+});
+
 //stuff for practice
 app.get("/jared", (req, res) => {
   let sql =
@@ -206,7 +203,10 @@ app.post("/newuser", function (req, res, next) {
 
   var sql = `INSERT INTO SPW_Users(Username, Password, PermissionLevel) VALUES ("${username}", "${password}", "${permlevel}")`;
   db.query(sql, function (err, result) {
-    if (err) throw err;
+    if (err)
+      res.render("404", {
+        errorMessage: err,
+      });
     console.log("record inserted");
     res.redirect("/userspage");
   });
@@ -228,7 +228,7 @@ app.post("/auth", function (request, response) {
         // If the account exists
         if (results.length > 0) {
           if (results[0].PermissionLevel >= 3) {
-            response.redirect("/dashboardpage");
+            response.redirect("/datapage");
           } else if (results[0].PermissionLevel < 3) {
             response.redirect("/userspage");
           }

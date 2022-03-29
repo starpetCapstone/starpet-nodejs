@@ -93,7 +93,7 @@ app.get("/create", (req, res) => {
 
 app.get("/", function (req, res) {
   res.render("login", {
-    errorMessage: "",
+    errorMessage: "‎",
   });
 });
 

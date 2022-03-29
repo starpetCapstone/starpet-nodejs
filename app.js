@@ -92,6 +92,7 @@ app.get("/", function (req, res) {
   res.render("login", {
     errorMessage: "",
   });
+  res.sendFile("index.html", { root: __dirname });
 });
 
 app.get("/userspage", function (req, res) {

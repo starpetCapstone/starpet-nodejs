@@ -64,9 +64,9 @@
         </tr>
       </thead>
       <tbody>
-        <% for(var i=0; i<users.length; i++) {%>
+        <% for(var i=0; i<users.length; i++) { %> 
         <tr>
-          <td id="username" contenteditable="false"> <%= users[i].Username %></td>
+          <td id="username" contenteditable="true"> <%= users[i].Username %></td>
           <td id = "password" contenteditable="false" ><%= users[i].Password %></td>
           <td id = "permlevel" contenteditable="false"><%= users[i].PermissionLevel %></td>
         </tr>

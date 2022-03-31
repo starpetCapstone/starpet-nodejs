@@ -131,15 +131,23 @@ app.get("/datapage", function (req, res) {
 });
 
 app.get("/shiftspage", function (req, res) {
-  res.render("adminPage/shifts", {
-    pagename: "Shifts",
-    navlinkdashboard: "",
-    navlinkdata: "",
-    navlinkshifts: "active",
-    navlinkusers: "",
-    navlinkreports: "",
-    navlinklocations: "",
-  });
+  var query = "select * from SPW_Shifts";
+
+  db.query(query, function (err, result) {
+    if (err) throw err;
+    else {
+      res.render("adminPage/shifts", {
+        pagename: "Shifts",
+        navlinkdashboard: "",
+        navlinkdata: "",
+        navlinkshifts: "active",
+        navlinkusers: "",
+        navlinkreports: "",
+        navlinklocations: "",
+        shifts: result,
+      });
+    }
+});
 });
 
 app.get("/reportspage", function (req, res) {
@@ -205,6 +213,19 @@ app.post("/newuser", function (req, res, next) {
     if (err) throw err;
     console.log("record inserted");
     res.redirect("/userspage");
+  });
+});
+
+app.post("/newshift", function (req, res, next) {
+  var shift = req.body.shift;
+  var shiftTime = req.body.shiftTime;
+  console.log(shift, shiftTime);
+
+  var sql = `INSERT INTO SPW_Shifts(ShiftName, TimeOfDay) VALUES ("${shift}", "${shiftTime}")`;
+  db.query(sql, function (err, result) {
+    if (err) throw err;
+    console.log("record inserted");
+    res.redirect("/shiftspage");
   });
 });
 

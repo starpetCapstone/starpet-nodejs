@@ -118,6 +118,18 @@ app.get("/userspage", function (req, res) {
   });
 });
 
+function productUpdate(){
+  for (var u = 0; u < users.length; u++)
+  var username = users[u].UserName;
+  var password = users[u].Password;
+  var permlevel = users[u].PermissionLevel;
+    let table8 =
+    `UPDATE SPW_Users(Username, Password, PermissionLevel) VALUES ("${username}", "${password}", "${permlevel}") WHERE UserID = "${u}"`;
+    db.query(sql, function (err, result) {
+      if (err) throw err;
+    });
+  };
+
 app.get("/datapage", function (req, res) {
   res.render("adminPage/data", {
     pagename: "Data",

@@ -63,18 +63,22 @@
           <th scope="col">PermLevel</th>
         </tr>
       </thead>
-      <tbody>
-        <% for(var i=0; i<users.length; i++) { %> 
+      <tbody>        
+       <% for(var i=0; i<users.length; i++) { %> 
         <tr>
           <td id="username" contenteditable="true"> <%= users[i].Username %></td>
           <td id = "password" contenteditable="false" ><%= users[i].Password %></td>
           <td id = "permlevel" contenteditable="false"><%= users[i].PermissionLevel %></td>
-        </tr>
+        </tr>        
         <% } %>
+        
       </tbody>
+      
     </table>
+    <button onclick="changeUsersPage(users.results)">Save</button>
   </div>
 </main>
+
 
 <style>
    .table-responsive {

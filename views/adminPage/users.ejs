@@ -28,7 +28,7 @@
     <div class="input-group">
       <input
         type="text"
-        class="form-control"
+        class="form-control rounded"
         id="username"
         placeholder="Enter username"
         name="username"
@@ -36,13 +36,13 @@
 
       <input
         type="text"
-        class="form-control"
+        class="form-control rounded"
         id="password"
         placeholder="Enter password"
         name="password"
       />
 
-      <select id="permlevel" class="form-control" name="permlevel">
+      <select id="permlevel" class="form-control rounded" name="permlevel">
         <option hidden>Select Permission Level</option>
         <option>1</option>
         <option>2</option>
@@ -50,7 +50,7 @@
         <option>4</option>
       </select>
 
-      <button type="submit" class="btn btn-danger" id="insertButton">Insert</button>
+      <button type="submit" class="btn btn-danger rounded" id="insertButton">Insert</button>
     </div>
   </form>
   <p></p>
@@ -89,14 +89,9 @@ input {
 }
 select {
   margin-right: 5px;
+  border-radius : 5px;
 }
 
-
-.input-group:not(.has-validation)
-  > :not(:last-child):not(.dropdown-toggle):not(.dropdown-menu) {
-  border-top-right-radius: 5;
-  border-bottom-right-radius: 5;
-}
 </style>
 
 <%- include('partials/footer.ejs') %>

@@ -6,7 +6,7 @@ const session = require("express-session");
 const path = require("path");
 const app = express();
 const favicon = require("serve-favicon");
-
+var NAME;
 // create connection
 const db = mysql.createConnection({
   host: process.env.DATABASE_host,
@@ -82,16 +82,24 @@ app.get("/create", (req, res) => {
     if (err) throw err;
     console.log("table7 is created...");
   });
+  let adminProfile = `INSERT INTO SPW_Users(Username, Password, PermissionLevel) VALUES ("admin", "admin", "4")`;
+  db.query(adminProfile, function (err, result) {
+    if (err) throw err;
+    console.log("record inserted");
+  });
   let table8 =
     "CREATE TABLE SPW_MachineData (DataID integer, MachineDataID integer, MachineID integer,UserShiftID integer,UserID integer,ShiftID integer,number varchar(50), string varchar(50), Bool bit, TimeCreated TIMESTAMP, PRIMARY KEY (MachineDataID, MachineID, DataID), FOREIGN KEY (MachineID) REFERENCES SPW_Machines(MachineID), FOREIGN KEY (UserShiftID, UserID, ShiftID) REFERENCES SPW_UserShifts(UserShiftID, UserID, ShiftID), FOREIGN KEY (DataID) REFERENCES SPW_Data(DataID))";
   db.query(table8, (err, result) => {
     if (err) throw err;
     console.log("table8 is created...");
-    res.send("ALL TABLES COMPLETE...");
+    res.render("login", {
+      errorMessage: "‎",
+    });
   });
 });
 
 app.get("/", function (req, res) {
+  let sql = "SELECT Username FROM SPW_Users; ";
   res.render("login", {
     errorMessage: "‎",
   });
@@ -105,7 +113,7 @@ app.get("/userspage", function (req, res) {
     else {
       res.render("adminPage/users", {
         pagename: "Users",
-        firstName: "Brinkley",
+        name: NAME,
         navlinkdashboard: "",
         navlinkdata: "",
         navlinkshifts: "",
@@ -121,6 +129,7 @@ app.get("/userspage", function (req, res) {
 app.get("/datapage", function (req, res) {
   res.render("adminPage/data", {
     pagename: "Data",
+    name: NAME,
     navlinkdashboard: "",
     navlinkdata: "active",
     navlinkshifts: "",
@@ -131,20 +140,30 @@ app.get("/datapage", function (req, res) {
 });
 
 app.get("/shiftspage", function (req, res) {
-  res.render("adminPage/shifts", {
-    pagename: "Shifts",
-    navlinkdashboard: "",
-    navlinkdata: "",
-    navlinkshifts: "active",
-    navlinkusers: "",
-    navlinkreports: "",
-    navlinklocations: "",
+  var query = "select * from SPW_Shifts";
+
+  db.query(query, function (err, result) {
+    if (err) throw err;
+    else {
+      res.render("adminPage/shifts", {
+        pagename: "Shifts",
+        name: NAME,
+        navlinkdashboard: "",
+        navlinkdata: "",
+        navlinkshifts: "active",
+        navlinkusers: "",
+        navlinkreports: "",
+        navlinklocations: "",
+        shifts: result,
+      });
+    }
   });
 });
 
 app.get("/reportspage", function (req, res) {
   res.render("adminPage/reports", {
     pagename: "Reports",
+    name: NAME,
     navlinkdashboard: "",
     navlinkdata: "",
     navlinkshifts: "",
@@ -157,6 +176,7 @@ app.get("/reportspage", function (req, res) {
 app.get("/locationspage", function (req, res) {
   res.render("adminPage/locations", {
     pagename: "Locations",
+    name: NAME,
     navlinkdashboard: "",
     navlinkdata: "",
     navlinkshifts: "",
@@ -208,6 +228,19 @@ app.post("/newuser", function (req, res, next) {
   });
 });
 
+app.post("/newshift", function (req, res, next) {
+  var shift = req.body.shift;
+  var shiftTime = req.body.shiftTime;
+  console.log(shift, shiftTime);
+
+  var sql = `INSERT INTO SPW_Shifts(ShiftName, TimeOfDay) VALUES ("${shift}", "${shiftTime}")`;
+  db.query(sql, function (err, result) {
+    if (err) throw err;
+    console.log("record inserted");
+    res.redirect("/shiftspage");
+  });
+});
+
 app.post("/auth", function (request, response) {
   // Capture the input fields
   let username = request.body.username;
@@ -223,6 +256,7 @@ app.post("/auth", function (request, response) {
         if (error) throw error;
         // If the account exists
         if (results.length > 0) {
+          NAME = results[0].Username;
           if (results[0].PermissionLevel >= 3) {
             response.redirect("/datapage");
           } else if (results[0].PermissionLevel < 3) {
@@ -243,6 +277,8 @@ app.post("/auth", function (request, response) {
     response.end();
   }
 });
+
+app.post("/editUser", function (req, res) {});
 
 //have app listen on specifc port
 app.listen("3000", () => {

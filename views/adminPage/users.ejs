@@ -70,12 +70,12 @@
           <td id = "password" contenteditable="false" ><%= users[i].Password %></td>
           <td id = "permlevel" contenteditable="false"><%= users[i].PermissionLevel %></td>
         </tr>        
-        <% } %>
-        
-      </tbody>
-      
+        <% } %>        
+      </tbody>      
     </table>
-    <button onclick="changeUsersPage(users.results)">Save</button>
+    <button type"button"
+    id="updateButton"
+    onclick="productUpdate()">Save</button>
   </div>
 </main>
 

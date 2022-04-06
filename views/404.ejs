@@ -1,2 +1,30 @@
-<h1>This is the 404 page!</h1>
-<h2><%= errorMessage %></h2>
+<main>
+
+    <div id="error">
+        <h1>404</h1>
+        <h2>Page Not Found!</h2>
+        <h3>We're sorry, we cannot find the page you are looking for.</h3>
+        <h4><%= errorMessage %></h4>
+    </div>
+    
+</main>
+
+<style>
+main {
+    height: 100%;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+h1 {    
+    font-size: 8em;
+}
+
+h2 {
+    font-size: 3em;
+    padding-top: -20px;
+}
+
+</style>

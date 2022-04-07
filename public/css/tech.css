@@ -1,0 +1,49 @@
+/* Custom page CSS
+-------------------------------------------------- */
+/* Not required for template or sticky footer method. */
+
+@import url("https://fonts.googleapis.com/css2?family=Readex+Pro:wght@200;400&display=swap");
+
+.feather {
+  width: 32px;
+  height: 32px;
+  vertical-align: text-bottom;
+}
+
+body {
+  font-size: 0.875rem;
+  font-family: "Readex Pro", sans-serif;
+  font-weight: 300;
+}
+
+main > .container {
+  padding: 60px 15px 0;
+}
+
+.list-group-checkable {
+  display: grid;
+  gap: 0.5rem;
+  border: 0;
+}
+.list-group-checkable .list-group-item {
+  cursor: pointer;
+  border-radius: 0.5rem;
+}
+.list-group-item-check {
+  position: absolute;
+  clip: rect(0, 0, 0, 0);
+  pointer-events: none;
+}
+.list-group-item-check:hover + .list-group-item {
+  background-color: var(--bs-light);
+}
+.list-group-item-check:checked + .list-group-item {
+  color: #fff;
+  background-color: var(--bs-blue);
+}
+.list-group-item-check[disabled] + .list-group-item,
+.list-group-item-check:disabled + .list-group-item {
+  pointer-events: none;
+  filter: none;
+  opacity: 0.5;
+}

@@ -20,6 +20,58 @@
       </button>
     </div>
   </div>
+  <form action="newlocation" method="POST" class="form-inline">
+    <p><b>Create New Location</b></p>
+    <div class="input-group">
+      <select
+        id="locationType"
+        class="form-control rounded"
+        name="locationType"
+      >
+        <option value="plant">Plant</option>
+        <option value="floor">Floor</option>
+        <option value="machine">Machine</option>
+      </select>
+      <input
+        type="text"
+        class="form-control rounded"
+        id="forPlants"
+        placeholder="PLANT"
+      />
+
+      <input
+        type="text"
+        class="form-control rounded"
+        id="forFloor"
+        placeholder="FLOOR"
+      />
+
+      <input
+        type="text"
+        class="form-control rounded"
+        id="forMachine"
+        placeholder="MACHINE"
+      />
+
+      <button type="submit" class="btn btn-danger rounded" id="submitNew">
+        Insert
+      </button>
+    </div>
+  </form>
+  <script>
+    $("#locationType").change(function () {
+      if ($(this).val() == "plant") {
+        $("#forPlants").show();
+        // $("#otherField").attr("required", "");
+        // $("#otherField").attr("data-error", "This field is required.");
+      } else {
+        $("#forPlants").hide();
+        // $("#otherField").removeAttr("required");
+        // $("#otherField").removeAttr("data-error");
+      }
+    });
+    $("#locationType").trigger("change");
+  </script>
 </main>
 
 <%- include('partials/footer.ejs') %>

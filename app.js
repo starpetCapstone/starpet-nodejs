@@ -13,7 +13,8 @@ const db = mysql.createConnection({
   port: "8889",
   user: "brinkley",
   password: "hello",
-  database: "test1",
+  database: "test3",
+  multipleStatements: true,
 });
 // connect to database
 db.connect((err) => {
@@ -59,7 +60,7 @@ app.get("/create", (req, res) => {
     console.log("table3 is created...");
   });
   let table4 =
-    "CREATE TABLE SPW_Data (DataID integer NOT NULL AUTO_INCREMENT, MachineID integer, DataName varchar(50), DataCreated TIMESTAMP, PRIMARY KEY (DataID, MachineID),  FOREIGN KEY (MachineID) REFERENCES SPW_Machines(MachineID))";
+    "CREATE TABLE SPW_DataTypes (DataTypesID integer NOT NULL AUTO_INCREMENT, Label varchar(50), Type varchar(50), Unit varchar(50), TimeCreated TIMESTAMP, PRIMARY KEY (DataTypesID))";
   db.query(table4, (err, result) => {
     if (err) throw err;
     console.log("table4 is created...");
@@ -88,7 +89,7 @@ app.get("/create", (req, res) => {
     console.log("record inserted");
   });
   let table8 =
-    "CREATE TABLE SPW_MachineData (DataID integer, MachineDataID integer, MachineID integer,UserShiftID integer,UserID integer,ShiftID integer,number varchar(50), string varchar(50), Bool bit, TimeCreated TIMESTAMP, PRIMARY KEY (MachineDataID, MachineID, DataID), FOREIGN KEY (MachineID) REFERENCES SPW_Machines(MachineID), FOREIGN KEY (UserShiftID, UserID, ShiftID) REFERENCES SPW_UserShifts(UserShiftID, UserID, ShiftID), FOREIGN KEY (DataID) REFERENCES SPW_Data(DataID))";
+    "CREATE TABLE SPW_MachineData (DataTypesID integer, MachineDataID integer, MachineID integer, UserShiftID integer, UserID integer, ShiftID integer, Value varchar(50), TimeCreated TIMESTAMP, PRIMARY KEY (MachineDataID), FOREIGN KEY (MachineID) REFERENCES SPW_Machines(MachineID), FOREIGN KEY (UserShiftID, UserID, ShiftID) REFERENCES SPW_UserShifts(UserShiftID, UserID, ShiftID), FOREIGN KEY (DataTypesID) REFERENCES SPW_DataTypes(DataTypesID))";
   db.query(table8, (err, result) => {
     if (err) throw err;
     console.log("table8 is created...");
@@ -127,15 +128,23 @@ app.get("/userspage", function (req, res) {
 });
 
 app.get("/datapage", function (req, res) {
-  res.render("adminPage/data", {
-    pagename: "Data",
-    name: NAME,
-    navlinkdashboard: "",
-    navlinkdata: "active",
-    navlinkshifts: "",
-    navlinkusers: "",
-    navlinkreports: "",
-    navlinklocations: "",
+  var query = "select * from SPW_DataTypes";
+
+  db.query(query, function (err, result) {
+    if (err) throw err;
+    else {
+      res.render("adminPage/data", {
+        pagename: "Data",
+        name: NAME,
+        navlinkdashboard: "",
+        navlinkdata: "active",
+        navlinkshifts: "",
+        navlinkusers: "",
+        navlinkreports: "",
+        navlinklocations: "",
+        shifts: result,
+      });
+    }
   });
 });
 
@@ -186,6 +195,21 @@ app.get("/locationspage", function (req, res) {
   });
 });
 
+app.get("/techpage", function (req, res) {
+  var query = "select * from SPW_Plants; select * from SPW_Floors;";
+  db.query(query, function (err, result) {
+    if (err) throw err;
+    else {
+      console.log(result[0]);
+      res.render("techPage/home", {
+        name: NAME,
+        plants: result[0],
+        floors: result[1],
+      });
+    }
+  });
+});
+
 app.get("/404", function (req, res) {
   res.render("404", {
     errorMessage: "",
@@ -210,6 +234,20 @@ app.get("/branson", (req, res) => {
     if (err) throw err;
     console.log("display is created...");
     res.send(result);
+  });
+});
+
+app.put("/editUser", function (req, res, next) {
+  var username = req.body.username;
+  var password = req.body.password;
+  var permlevel = req.body.permlevel;
+  console.log(username, password, permlevel);
+
+  var sql = `INSERT INTO SPW_Users(Username, Password, PermissionLevel) VALUES ("${username}", "${password}", "${permlevel}")`;
+  db.query(sql, function (err, result) {
+    if (err) throw err;
+    console.log("record inserted");
+    res.redirect("/userspage");
   });
 });
 

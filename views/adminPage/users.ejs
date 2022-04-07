@@ -44,10 +44,10 @@
 
       <select id="permlevel" class="form-control rounded" name="permlevel">
         <option hidden>Select Permission Level</option>
-        <option>1</option>
-        <option>2</option>
-        <option>3</option>
-        <option>4</option>
+        <option value="1">ONE</option>
+        <option value="2">TWO</option>
+        <option value="3">THREE</option>
+        <option value="4">FOUR</option>
       </select>
 
       <button type="submit" class="btn btn-danger rounded" id="insertButton">Insert</button>
@@ -65,27 +65,15 @@
       </thead>
       <tbody>
         <% for(var i=0; i<users.length; i++) {%>
-          <form action="editUser" method="POST" class="form-inline">
+ 
         <tr>
           <td name="currentUsername">   
             <%= users[i].Username %></td>
-          <td id="currentPassword" >   
-            <input
-            type="text"
-            class=""
-            id="editPassword"
-            placeholder="<%= users[i].Password %>"
-          /></td>
-          <td id="currentPermLevel" value="<%= users[i].PermissionLevel %>" >   
-            <input
-            type="text"
-            class=""
-            id="editPermLevel"
-            placeholder="<%= users[i].PermissionLevel %>"
-          /></td>
-          <td>  <button type="submit" class="btn btn-success rounded" id="editButton"></button></td>
+          <td name="currentPassword" >   
+            <%= users[i].Password %></td>
+          <td name="currentPermLevel">
+            <%= users[i].PermissionLevel %></td>
         </tr>
-      </form>
         <% } %>
       </tbody>
     </table>

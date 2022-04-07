@@ -1,3 +1,5 @@
+<!-- users.html written by Brinkley Hill -->
+
 <%- include('partials/header.ejs') %> <%- include('partials/nav.ejs') %>
 
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
@@ -20,6 +22,64 @@
       </button>
     </div>
   </div>
+
+  <form action="newshift" method="POST" class="form-inline">
+    <p><b>Create New Data Type:</b></p>
+    <div class="input-group">
+      <input
+        type="text"
+        class="form-control rounded"
+        id="shift"
+        placeholder="Enter Data Type Label"
+        name="shift"
+      />
+
+      <select id="shiftTime" class="form-control rounded" name="shiftTime">
+        <option hidden>Select Value Type</option>
+        <option>bool</option>
+        <option>Night</option>
+      </select>
+
+      <button type="submit" class="btn btn-danger rounded" id="insertButton">Insert</button>
+    </div>
+  </form>
+  <p></p>
+  <div class="table-responsive border">
+    <table class="table table-hover" style="overflow:auto" height="100px">
+      <thead>
+        <tr>
+          <th scope="col">Shift</th>
+          <th scope="col">Shift Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for(var i=0; i<shifts.length; i++) {%>
+        <tr>
+          <td id="shift" contenteditable="false"> <%= shifts[i].ShiftName %></td>
+          <td id ="shiftTime" contenteditable="false"><%= shifts[i].TimeOfDay %></td>
+        </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
 </main>
+
+<style>
+   .table-responsive {
+    overflow-y:scroll;
+    height: 400px;
+    border-radius: 5px;
+
+  }
+input {
+  margin-right: 9px;
+  border-radius : 5px;
+}
+select {
+  margin-right: 5px;
+  border-radius : 5px;
+}
+
+</style>
 
 <%- include('partials/footer.ejs') %>

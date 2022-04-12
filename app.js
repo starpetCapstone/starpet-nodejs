@@ -4,8 +4,11 @@ const bodyParser = require("body-parser");
 const { UCS2_PERSIAN_CI } = require("mysql/lib/protocol/constants/charsets");
 const session = require("express-session");
 const path = require("path");
+const bcrypt = require("bcrypt");
 const app = express();
 const favicon = require("serve-favicon");
+const saltRounds = 10;
+var LOGGEDIN = Boolean(false);
 var NAME;
 // create connection
 const db = mysql.createConnection({
@@ -13,7 +16,7 @@ const db = mysql.createConnection({
   port: "8889",
   user: "brinkley",
   password: "hello",
-  database: "test3",
+  database: "test5",
   multipleStatements: true,
 });
 // connect to database
@@ -40,7 +43,7 @@ app.set("view engine", "ejs");
 
 //***********GET FUNCTIONS***************
 //first time DB setup
-app.get("/create", (req, res) => {
+app.get("/create", async (req, res) => {
   let table1 =
     "CREATE TABLE SPW_Plants (PlantID integer NOT NULL AUTO_INCREMENT, PlantName varchar(50), PlantCreated TIMESTAMP, PRIMARY KEY (PlantID))";
   db.query(table1, (err, result) => {
@@ -72,7 +75,7 @@ app.get("/create", (req, res) => {
     console.log("table5 is created...");
   });
   let table6 =
-    "CREATE TABLE SPW_Users (UserID integer NOT NULL AUTO_INCREMENT, Username varchar(50), Password varchar(50), PermissionLevel integer, UserCreated TIMESTAMP, PRIMARY KEY (UserID))";
+    "CREATE TABLE SPW_Users (UserID integer NOT NULL AUTO_INCREMENT, Username varchar(50), Password varchar(250), PermissionLevel integer, UserCreated TIMESTAMP, PRIMARY KEY (UserID))";
   db.query(table6, (err, result) => {
     if (err) throw err;
     console.log("table6 is created...");
@@ -83,7 +86,8 @@ app.get("/create", (req, res) => {
     if (err) throw err;
     console.log("table7 is created...");
   });
-  let adminProfile = `INSERT INTO SPW_Users(Username, Password, PermissionLevel) VALUES ("admin", "admin", "4")`;
+  let encryptedAdminPassword = await bcrypt.hash("admin", saltRounds);
+  let adminProfile = `INSERT INTO SPW_Users(Username, Password, PermissionLevel) VALUES ("admin", "${encryptedAdminPassword}", "4")`;
   db.query(adminProfile, function (err, result) {
     if (err) throw err;
     console.log("record inserted");
@@ -106,25 +110,38 @@ app.get("/", function (req, res) {
   });
 });
 
+app.get("/signout", function (req, res) {
+  res.render("login", {
+    errorMessage: "Signed out successfully.",
+  });
+  LOGGEDIN = false;
+});
+
 app.get("/userspage", function (req, res) {
   var query = "select * from SPW_Users";
 
-  db.query(query, function (err, result) {
-    if (err) throw err;
-    else {
-      res.render("adminPage/users", {
-        pagename: "Users",
-        name: NAME,
-        navlinkdashboard: "",
-        navlinkdata: "",
-        navlinkshifts: "",
-        navlinkusers: "active",
-        navlinkreports: "",
-        navlinklocations: "",
-        users: result,
-      });
-    }
-  });
+  if (LOGGEDIN) {
+    db.query(query, function (err, result) {
+      if (err) throw err;
+      else {
+        res.render("adminPage/users", {
+          pagename: "Users",
+          name: NAME,
+          navlinkdashboard: "",
+          navlinkdata: "",
+          navlinkshifts: "",
+          navlinkusers: "active",
+          navlinkreports: "",
+          navlinklocations: "",
+          users: result,
+        });
+      }
+    });
+  } else {
+    res.render("login", {
+      errorMessage: "Please login :)",
+    });
+  }
 });
 
 app.get("/datapage", function (req, res) {
@@ -183,16 +200,22 @@ app.get("/reportspage", function (req, res) {
 });
 
 app.get("/locationspage", function (req, res) {
-  res.render("adminPage/locations", {
-    pagename: "Locations",
-    name: NAME,
-    navlinkdashboard: "",
-    navlinkdata: "",
-    navlinkshifts: "",
-    navlinkusers: "",
-    navlinkreports: "",
-    navlinklocations: "active",
-  });
+  if (LOGGEDIN) {
+    res.render("adminPage/locations", {
+      pagename: "Locations",
+      name: NAME,
+      navlinkdashboard: "",
+      navlinkdata: "",
+      navlinkshifts: "",
+      navlinkusers: "",
+      navlinkreports: "",
+      navlinklocations: "active",
+    });
+  } else {
+    res.render("login", {
+      errorMessage: "Please login :)",
+    });
+  }
 });
 
 app.get("/techpage", function (req, res) {
@@ -216,27 +239,6 @@ app.get("/404", function (req, res) {
   });
 });
 
-//stuff for practice
-app.get("/jared", (req, res) => {
-  let sql =
-    "INSERT INTO SPW_Users(Username, Password, PermissionLevel) VALUES ('jared', 'hello', '4');";
-  db.query(sql, (err, result) => {
-    if (err) throw err;
-    console.log("name is created...");
-    res.send("name is COMPLETE...");
-  });
-});
-
-app.get("/branson", (req, res) => {
-  let sql =
-    "SELECT UserID, Username, Password, PermissionLevel FROM SPW_Users; ";
-  db.query(sql, (err, result) => {
-    if (err) throw err;
-    console.log("display is created...");
-    res.send(result);
-  });
-});
-
 app.put("/editUser", function (req, res, next) {
   var username = req.body.username;
   var password = req.body.password;
@@ -252,13 +254,13 @@ app.put("/editUser", function (req, res, next) {
 });
 
 //***********POST FUNCTIONS***************
-app.post("/newuser", function (req, res, next) {
+app.post("/newuser", async function (req, res, next) {
   var username = req.body.username;
   var password = req.body.password;
+  const encryptedPassword = await bcrypt.hash(password, saltRounds);
   var permlevel = req.body.permlevel;
-  console.log(username, password, permlevel);
 
-  var sql = `INSERT INTO SPW_Users(Username, Password, PermissionLevel) VALUES ("${username}", "${password}", "${permlevel}")`;
+  var sql = `INSERT INTO SPW_Users(Username, Password, PermissionLevel) VALUES ("${username}", "${encryptedPassword}", "${permlevel}")`;
   db.query(sql, function (err, result) {
     if (err) throw err;
     console.log("record inserted");
@@ -279,22 +281,25 @@ app.post("/newshift", function (req, res, next) {
   });
 });
 
-app.post("/auth", function (request, response) {
+app.post("/auth", async function (request, response) {
   // Capture the input fields
   let username = request.body.username;
   let password = request.body.password;
-  // Ensure the input fields exists and are not empty
-  if (username && password) {
-    // Execute SQL query that'll select the account from the database based on the specified username and password
-    db.query(
-      "SELECT * FROM SPW_Users WHERE username = ? AND password = ?",
-      [username, password],
-      function (error, results, fields) {
-        // If there is an issue with the query, output the error
-        if (error) throw error;
-        // If the account exists
-        if (results.length > 0) {
+
+  db.query(
+    "SELECT * FROM SPW_Users WHERE username = ?",
+    [username],
+    async function (error, results, fields) {
+      // If there is an issue with the query, output the error
+      if (error) throw error;
+
+      // If the account exists
+      if (results.length > 0) {
+        const comparison = await bcrypt.compare(password, results[0].Password);
+        if (comparison) {
           NAME = results[0].Username;
+          LOGGEDIN = true;
+          console.log(LOGGEDIN);
           if (results[0].PermissionLevel >= 3) {
             response.redirect("/datapage");
           } else if (results[0].PermissionLevel < 3) {
@@ -302,21 +307,19 @@ app.post("/auth", function (request, response) {
           }
         } else {
           response.render("login", {
-            errorMessage: "Incorrect Username or Password",
+            errorMessage: "Incorrect Password",
           });
         }
         response.end();
+      } else {
+        response.render("login", {
+          errorMessage: "Username does not exist",
+        });
+        response.end();
       }
-    );
-  } else {
-    response.render("login", {
-      errorMessage: "Please Enter Username and Password",
-    });
-    response.end();
-  }
+    }
+  );
 });
-
-app.post("/editUser", function (req, res) {});
 
 //have app listen on specifc port
 app.listen("3000", () => {

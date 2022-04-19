@@ -27,7 +27,10 @@
     "express-flash": "^0.0.2",
     "express-session": "^1.17.2",
     "feather-icons": "^4.28.0",
+    "file-saver": "^2.0.5",
+    "fs": "^0.0.1-security",
     "jquery": "^3.6.0",
+    "loading-spinner": "^1.2.1",
     "mysql": "^2.18.1",
     "mysql2": "^2.3.3",
     "serve-favicon": "^2.5.0"

@@ -6,25 +6,39 @@ const session = require("express-session");
 const path = require("path");
 const bcrypt = require("bcrypt");
 const app = express();
+
+const envfile = "./*.env";
+require("dotenv").config();
 const favicon = require("serve-favicon");
+const { env } = require("process");
 const saltRounds = 10;
 var LOGGEDIN = Boolean(false);
 var NAME;
+var dbCONNECTED = Boolean(false);
+var envExists;
+
+if (process.env.user) {
+  var envExists = true;
+} else {
+  var envExists = false;
+}
+
 // create connection
 const db = mysql.createConnection({
-  host: process.env.DATABASE_host,
-  port: "8889",
-  user: "brinkley",
-  password: "hello",
-  database: "test5",
+  port: process.env.port,
+  host: process.env.host,
+  user: process.env.user,
+  password: process.env.password,
+  database: process.env.database,
   multipleStatements: true,
 });
 // connect to database
 db.connect((err) => {
-  if (err) {
-    console.log(err);
+  if (err) console.log("mySQL connected:", dbCONNECTED);
+  else {
+    dbCONNECTED = true;
+    console.log("mySQL connected:", dbCONNECTED);
   }
-  console.log("MySql Connected");
 });
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -97,17 +111,22 @@ app.get("/create", async (req, res) => {
   db.query(table8, (err, result) => {
     if (err) throw err;
     console.log("table8 is created...");
-    res.render("login", {
-      errorMessage: "‎",
-    });
   });
 });
 
 app.get("/", function (req, res) {
-  let sql = "SELECT Username FROM SPW_Users; ";
-  res.render("login", {
-    errorMessage: "‎",
-  });
+  if (envExists == false) {
+    res.render("dbSetup");
+  } else {
+    if (dbCONNECTED == true) {
+      let sql = "SELECT Username FROM SPW_Users; ";
+      res.render("login", {
+        errorMessage: "‎",
+      });
+    } else {
+      res.render("dbProblem");
+    }
+  }
 });
 
 app.get("/signout", function (req, res) {
@@ -281,6 +300,92 @@ app.post("/newshift", function (req, res, next) {
   });
 });
 
+app.post("/dbCredentials", async function (req, res, next) {
+  var host = req.body.host;
+  var username = req.body.username;
+  var password = req.body.password;
+  var database = req.body.database;
+  var port = req.body.port;
+
+  const fs = require("fs");
+
+  let data =
+    "port=" +
+    port +
+    "\n" +
+    "user=" +
+    username +
+    "\n" +
+    "password=" +
+    password +
+    "\n" +
+    "database=" +
+    database +
+    "\n" +
+    "host=" +
+    host;
+
+  fs.writeFile(".env", data, (err) => {
+    if (err) throw err;
+  });
+  db.connect(async (err) => {
+    if (err)
+      res.send("Unable to Connect to Database with provided credentials.");
+    else {
+      dbCONNECTED = true;
+      let table1 =
+        "CREATE TABLE SPW_Plants (PlantID integer NOT NULL AUTO_INCREMENT, PlantName varchar(50), PlantCreated TIMESTAMP, PRIMARY KEY (PlantID))";
+      db.query(table1, (err, result) => {
+        if (err) throw err;
+      });
+      let table2 =
+        "CREATE TABLE SPW_Floors (FloorID integer NOT NULL AUTO_INCREMENT, PlantID integer, FloorName varchar(50), FloorCreated TIMESTAMP, PRIMARY KEY (FloorID, PlantID),  FOREIGN KEY (PlantID) REFERENCES SPW_Plants(PlantID))";
+      db.query(table2, (err, result) => {
+        if (err) throw err;
+      });
+      let table3 =
+        "CREATE TABLE SPW_Machines (MachineID integer NOT NULL AUTO_INCREMENT, FloorID integer, PlantID integer, MachineName varchar(50), MachineCreated TIMESTAMP, PRIMARY KEY (MachineID), FOREIGN KEY (PlantID, FloorID) REFERENCES SPW_Floors(PlantID, FloorID))";
+      db.query(table3, (err, result) => {
+        if (err) throw err;
+      });
+      let table4 =
+        "CREATE TABLE SPW_DataTypes (DataTypesID integer NOT NULL AUTO_INCREMENT, Label varchar(50), Type varchar(50), Unit varchar(50), TimeCreated TIMESTAMP, PRIMARY KEY (DataTypesID))";
+      db.query(table4, (err, result) => {
+        if (err) throw err;
+      });
+      let table5 =
+        "CREATE TABLE SPW_Shifts (ShiftID integer NOT NULL AUTO_INCREMENT, ShiftName varchar(50), TimeOfDay varchar(50), ShiftCreated TIMESTAMP, PRIMARY KEY (ShiftID))";
+      db.query(table5, (err, result) => {
+        if (err) throw err;
+      });
+      let table6 =
+        "CREATE TABLE SPW_Users (UserID integer NOT NULL AUTO_INCREMENT, Username varchar(50), Password varchar(250), PermissionLevel varchar(50), UserCreated TIMESTAMP, PRIMARY KEY (UserID))";
+      db.query(table6, (err, result) => {
+        if (err) throw err;
+      });
+      let table7 =
+        "CREATE TABLE SPW_UserShifts (UserShiftID integer NOT NULL AUTO_INCREMENT, UserID integer, ShiftID integer, PRIMARY KEY (UserShiftID, UserID, ShiftID), FOREIGN KEY (ShiftID) REFERENCES SPW_Shifts(ShiftID),  FOREIGN KEY (UserID) REFERENCES SPW_Users(UserID))";
+      db.query(table7, (err, result) => {
+        if (err) throw err;
+      });
+      let encryptedAdminPassword = await bcrypt.hash("admin", saltRounds);
+      let adminProfile = `INSERT INTO SPW_Users(Username, Password, PermissionLevel) VALUES ("admin", "${encryptedAdminPassword}", "ADMIN")`;
+      db.query(adminProfile, function (err, result) {
+        if (err) throw err;
+      });
+      let table8 =
+        "CREATE TABLE SPW_MachineData (DataTypesID integer, MachineDataID integer, MachineID integer, UserShiftID integer, UserID integer, ShiftID integer, Value varchar(50), TimeCreated TIMESTAMP, PRIMARY KEY (MachineDataID), FOREIGN KEY (MachineID) REFERENCES SPW_Machines(MachineID), FOREIGN KEY (UserShiftID, UserID, ShiftID) REFERENCES SPW_UserShifts(UserShiftID, UserID, ShiftID), FOREIGN KEY (DataTypesID) REFERENCES SPW_DataTypes(DataTypesID))";
+      db.query(table8, (err, result) => {
+        if (err) throw err;
+      });
+      console.log("mySQL connected:", dbCONNECTED);
+      res.render("login", {
+        errorMessage: "Welcome!",
+      });
+    }
+  });
+});
+
 app.post("/auth", async function (request, response) {
   // Capture the input fields
   let username = request.body.username;
@@ -300,11 +405,7 @@ app.post("/auth", async function (request, response) {
           NAME = results[0].Username;
           LOGGEDIN = true;
           console.log(LOGGEDIN);
-          if (results[0].PermissionLevel >= 3) {
-            response.redirect("/datapage");
-          } else if (results[0].PermissionLevel < 3) {
-            response.redirect("/userspage");
-          }
+          response.redirect("/datapage");
         } else {
           response.render("login", {
             errorMessage: "Incorrect Password",
@@ -323,5 +424,5 @@ app.post("/auth", async function (request, response) {
 
 //have app listen on specifc port
 app.listen("3000", () => {
-  console.log("Server is running on Port 3000");
+  console.log("*** Server is listening ***");
 });
